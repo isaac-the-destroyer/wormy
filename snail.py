@@ -9,13 +9,12 @@ import random, pygame, sys
 from pygame.locals import *
 
 FPS = 15
-WINDOWWIDTH = 640
-WINDOWHEIGHT = 480
 CELLSIZE = 20
-assert WINDOWWIDTH % CELLSIZE == 0, "Window width must be a multiple of cell size."
-assert WINDOWHEIGHT % CELLSIZE == 0, "Window height must be a multiple of cell size."
-CELLWIDTH = int(WINDOWWIDTH / CELLSIZE)
-CELLHEIGHT = int(WINDOWHEIGHT / CELLSIZE)
+CELLWIDTH = 32
+CELLHEIGHT = 24
+
+WINDOWWIDTH = CELLWIDTH * CELLSIZE
+WINDOWHEIGHT = CELLHEIGHT * CELLSIZE
 
 #             R    G    B
 WHITE     = (255, 255, 255)
@@ -62,6 +61,31 @@ def runGame():
                   {'x': startx - 2, 'y': starty}]
     direction = RIGHT
 
+    map = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+           [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
+
     # Start the apple in a random place.
     apple = getRandomLocation()
 
@@ -80,6 +104,12 @@ def runGame():
                     direction = DOWN
                 elif event.key == K_ESCAPE:
                     terminate()
+
+        # check if the worm has hit a rock in the map
+        x = wormCoords[HEAD]['x']
+        y = wormCoords[HEAD]['y']
+        if map[y][x] >= 1:
+            return True
 
         # check if the worm has hit itself or the edge
         if wormCoords[HEAD]['x'] == -1 or wormCoords[HEAD]['x'] == CELLWIDTH or wormCoords[HEAD]['y'] == -1 or wormCoords[HEAD]['y'] == CELLHEIGHT:
@@ -109,6 +139,7 @@ def runGame():
         DISPLAYSURF.fill(BGCOLOR)
         drawGrid()
         drawWorm(wormCoords)
+        drawRocks(map)
         drawApple(apple)
         drawScore(len(wormCoords) - 3)
         pygame.display.update()
@@ -215,6 +246,15 @@ def drawWorm(wormCoords):
         pygame.draw.rect(DISPLAYSURF, DARKGREEN, wormSegmentRect)
         wormInnerSegmentRect = pygame.Rect(x + 4, y + 4, CELLSIZE - 8, CELLSIZE - 8)
         pygame.draw.rect(DISPLAYSURF, GREEN, wormInnerSegmentRect)
+
+def drawRocks(map):
+    for x in range(CELLWIDTH):
+        for y in range(CELLHEIGHT):
+            if map[y][x] == 1:
+                screenx = x *CELLSIZE
+                screeny = y *CELLSIZE
+                rockRect = pygame.Rect(screenx, screeny, CELLSIZE, CELLSIZE)
+                pygame.draw.rect(DISPLAYSURF, DARKGRAY, rockRect)
 
 
 def drawApple(coord):
